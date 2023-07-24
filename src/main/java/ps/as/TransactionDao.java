@@ -3,7 +3,6 @@ package ps.as;
 import java.sql.*;
 
 public class TransactionDao {
-
     private Connection connection;
 
     public TransactionDao() {
@@ -28,14 +27,12 @@ public class TransactionDao {
             if (generatedKeys.next()) {
                transaction.setId(generatedKeys.getInt(1));
            }
-            System.out.println("Transakcja dodana do bazy danych.");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    public void modifyTransaction(Transaction transaction) {
+    public boolean modifyTransaction(Transaction transaction) {
         String sql = "UPDATE transaction SET type = ?, description = ?, amount = ?, date = ? WHERE id = ?";
         PreparedStatement preparedStatement;
         try {
@@ -45,66 +42,49 @@ public class TransactionDao {
             preparedStatement.setDouble(3, transaction.getAmount());
             preparedStatement.setString(4, transaction.getDate());
             preparedStatement.setInt(5, transaction.getId());
-            preparedStatement.executeUpdate();
-            System.out.println("Transakcja zostala zmodyfikowana.");
+            int updatedRows = preparedStatement.executeUpdate();
+            return updatedRows != 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void deleteTransaction(int id) {
+    public boolean deleteTransaction(int id) {
         String sql = "DELETE FROM transaction WHERE id = ?";
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-            System.out.println("Transakcja usunieta z bazy danych.");
+            int updatedRows = preparedStatement.executeUpdate();
+            return updatedRows != 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
-    public void printAllIncome() {
+    public ResultSet findAllIncome() {
         String sql = "SELECT * FROM transaction WHERE type = 'P'";
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement(sql);
             ResultSet resultSet = preparedStatement.executeQuery();
-            System.out.println("Przychody:");
-            printSelectedTransactions(resultSet);
+            return resultSet;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-
-    public void printAllExpenses() {
+    public ResultSet findAllExpenses() {
         String sql = "SELECT * FROM transaction WHERE type = 'W'";
         PreparedStatement preparedStatement;
         try {
             preparedStatement = connection.prepareStatement(sql);
             ResultSet resultSet = preparedStatement.executeQuery();
-            System.out.println("Wydatki:");
-            printSelectedTransactions(resultSet);
+            return resultSet;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
-    private static void printSelectedTransactions(ResultSet resultSet) throws SQLException {
-        while (resultSet.next()) {
-            int id = resultSet.getInt("id");
-            Type type = Type.valueOf(resultSet.getString("type"));
-            String description = resultSet.getString("description");
-            double amount = resultSet.getDouble("amount");
-            String date = resultSet.getString("date");
-            Transaction transaction = new Transaction(id, type, description, amount, date);
-            System.out.println(transaction);
-        }
-    }
-
 
     void close() {
         try {
@@ -113,5 +93,4 @@ public class TransactionDao {
             throw new RuntimeException(e);
         }
     }
-
 }

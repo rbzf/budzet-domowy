@@ -5,10 +5,5 @@ public class Main {
 
         BudgetApp budgetApp = new BudgetApp();
         budgetApp.run();
-
-
-
-
-
     }
 }
