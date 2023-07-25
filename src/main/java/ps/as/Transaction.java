@@ -19,13 +19,6 @@ public class Transaction {
         this.date = date;
     }
 
-    public Transaction(Integer id, String description, double amount, String date) {
-        this.id = id;
-        this.description = description;
-        this.amount = amount;
-        this.date = date;
-    }
-
     public Integer getId() {
         return id;
     }
