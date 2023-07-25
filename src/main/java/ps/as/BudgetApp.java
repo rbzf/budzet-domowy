@@ -1,18 +1,17 @@
 package ps.as;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
 import java.util.Scanner;
 
 public class BudgetApp {
 
     private Scanner scanner = new Scanner(System.in);
-    private final static String WYJSCIE_Z_PROGRAMU = "0";
-    private final static String DODAWANIE_TRANSAKCJI = "1";
-    private final static String MODYFIKACJA_TRANSAKCJI = "2";
-    private final static String USUWANIE_TRANSAKCJI = "3";
-    private final static String WYSWIETLANIE_WSZYSTKICH_PRZYCHODOW = "4";
-    private final static String WYSWIETLANIE_WSZYSTKICH_WYDATKOW = "5";
+    private final static String EXIT = "0";
+    private final static String ADD_TRANSACTION = "1";
+    private final static String MODIFY_TRANSACTION = "2";
+    private final static String DELETE_TRANSACTION = "3";
+    private final static String DISPLAY_ALL_INCOME = "4";
+    private final static String DISPLAY_ALL_EXPENSES = "5";
 
 
     public void run() {
@@ -22,22 +21,22 @@ public class BudgetApp {
             String option = getOption();
 
             switch (option) {
-                case WYJSCIE_Z_PROGRAMU:
+                case EXIT:
                     dao.close();
                     return;
-                case DODAWANIE_TRANSAKCJI:
+                case ADD_TRANSACTION:
                     addTransaction(dao);
                     break;
-                case MODYFIKACJA_TRANSAKCJI:
+                case MODIFY_TRANSACTION:
                     modifyTransaction(dao);
                     break;
-                case USUWANIE_TRANSAKCJI:
+                case DELETE_TRANSACTION:
                     deleteTransaction(dao);
                     break;
-                case WYSWIETLANIE_WSZYSTKICH_PRZYCHODOW:
+                case DISPLAY_ALL_INCOME:
                     printAllIncome(dao);
                     break;
-                case WYSWIETLANIE_WSZYSTKICH_WYDATKOW:
+                case DISPLAY_ALL_EXPENSES:
                     printAllExpenses(dao);
                     break;
                 default:
@@ -49,14 +48,14 @@ public class BudgetApp {
 
     private static void printAllExpenses(TransactionDao dao) {
         System.out.println("Wydatki:");
-        ResultSet resultSet = dao.findAllExpenses();
-        printSelectedTransactions(resultSet);
+        List<Transaction> listOfTransactions = dao.findAllExpenses();
+        printSelectedTransactions(listOfTransactions);
     }
 
     private static void printAllIncome(TransactionDao dao) {
         System.out.println("Przychody:");
-        ResultSet resultSet = dao.findAllIncome();
-        printSelectedTransactions(resultSet);
+        List<Transaction> listOfTransactions = dao.findAllIncome();
+        printSelectedTransactions(listOfTransactions);
     }
 
     private void deleteTransaction(TransactionDao dao) {
@@ -87,23 +86,13 @@ public class BudgetApp {
         System.out.println("Transakcja dodana do bazy danych.");
     }
 
-    private static void printSelectedTransactions(ResultSet resultSet) {
-        try {
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                Type type = Type.valueOf(resultSet.getString("type"));
-                String description = resultSet.getString("description");
-                double amount = resultSet.getDouble("amount");
-                String date = resultSet.getString("date");
-                Transaction transaction = new Transaction(id, type, description, amount, date);
-                System.out.println(transaction);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    private static void printSelectedTransactions(List<Transaction> listOfTransactions) {
+        for (Transaction transaction : listOfTransactions) {
+            System.out.println(transaction);
         }
     }
 
-        private Transaction getTransaction() {
+    private Transaction getTransaction() {
         System.out.println("jesli wydatek, to wpisz W, jesli przychod, wpisz P");
         Type type = Type.valueOf(scanner.nextLine());
         System.out.println("Podaj opis transakcji:");

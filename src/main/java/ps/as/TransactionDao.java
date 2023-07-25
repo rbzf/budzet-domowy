@@ -1,6 +1,8 @@
 package ps.as;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TransactionDao {
     private Connection connection;
@@ -62,28 +64,35 @@ public class TransactionDao {
         }
     }
 
-    public ResultSet findAllIncome() {
+    public List<Transaction> findAllIncome() {
         String sql = "SELECT * FROM transaction WHERE type = 'P'";
+        return getTransactions(sql);
+    }
+
+    private List<Transaction> getTransactions(String sql) {
         PreparedStatement preparedStatement;
+        List<Transaction> listOfTransactions = new ArrayList<>();
         try {
             preparedStatement = connection.prepareStatement(sql);
             ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet;
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                Type type = Type.valueOf(resultSet.getString("type"));
+                String description = resultSet.getString("description");
+                double amount = resultSet.getDouble("amount");
+                String date = resultSet.getString("date");
+                Transaction transaction = new Transaction(id, type, description, amount, date);
+                listOfTransactions.add(transaction);
+            }
+            return listOfTransactions;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public ResultSet findAllExpenses() {
+    public List<Transaction> findAllExpenses() {
         String sql = "SELECT * FROM transaction WHERE type = 'W'";
-        PreparedStatement preparedStatement;
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return getTransactions(sql);
     }
 
     void close() {
